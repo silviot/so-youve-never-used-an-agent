@@ -1,45 +1,274 @@
-// Adapted and reviewed from agy's initial draft in draft.md.
+// Adapted from agy’s initial draft; reviewed for a workflow led by the agent.
 export const lessons = [
-{short:'Start here',tag:'THE BRIEF',title:'So you’ve never used an agent?',intro:'You know your way around a computer. Now let’s put an agent to work: make a short video, inspect the result, and ask for a better version.',check:'I know what I’m making and which tools I’ll use.',sections:[
-{title:'Your first deliverable',paragraphs:['A 15-second explainer about how agents work. Three scenes: you give a goal; the model calls a tool; the result comes back and the agent continues. Prefer another topic? There’s a place to choose yours later.','You’ll use <strong>OpenCode</strong> to work with an AI model, <strong>Git</strong> to checkpoint the files, and <strong>Framefields</strong> to turn the agent’s code into video. The first version uses text, shapes and motion. Generating media with another model is optional.']},
-{title:'What makes this an agent?',paragraphs:['A chat model can suggest a command. An agent can request a tool that runs it, read the result, and choose a next step. OpenCode supplies those tools and handles permissions; the model chooses how to use them.','That loop is useful, but it can still get stuck or make bad calls. You supply the goal, grant the tools access, inspect the output, and steer. This course gives you a small project to practice that loop.'],note:'This guide uses native Windows and PowerShell, with OpenCode’s documented npm installation. OpenCode also recommends WSL; keeping the video project native gives Framefields access to Windows D3D12. Don’t mix Windows and WSL installs mid-project. <a href="https://opencode.ai/docs/windows-wsl">Windows guidance ↗</a>'}
-]},
-{short:'Git + Git LFS',tag:'SETUP / WINDOWS',title:'Give your work a save point.',intro:'Install Git for version history and Git LFS for large media. You don’t need a GitHub account to use either locally.',check:'Git and Git LFS are installed. I’ve configured my identity or will ask the agent to do it during project setup.',sections:[
-{title:'Install Git for Windows',list:['Download the installer for your machine (x64 or ARM64) from <a href="https://git-scm.com/install/windows">Git for Windows</a>. Run it and keep the recommended defaults, including command-line PATH access.','Open a fresh PowerShell window from Start. Run the checks below. Git for Windows normally includes Git LFS. If the second check fails, install it from <a href="https://git-lfs.com/">git-lfs.com</a> and reopen PowerShell.'],code:'git --version\ngit lfs version'},
-{title:'Optional: configure Git yourself',paragraphs:['You don’t have to run these configuration commands yourself. Once OpenCode is connected, the agent can configure Git and initialize Git LFS for you during project setup in chapter 5. It will ask which name and email you want on your commits.','The instructions below are worth reading even if you delegate the setup. Learning how Git records changes and identifies commits helps you understand and review the agent’s work.','Replace these placeholders with the identity you want on your commits. A GitHub no-reply email is useful if you plan to publish without exposing your personal address. This is commit metadata, not a login.'],code:'git config --global user.name "Your Name"\ngit config --global user.email "your-chosen-email@example.com"\ngit lfs install\ngit config --global --get user.name\ngit config --global --get user.email',note:'Git stores history. LFS stores pointers in that history and keeps large file content separately. We’ll track source media once the project exists; generated renders usually belong in .gitignore. Remote LFS storage and bandwidth can have quotas or charges.'}
-]},
-{short:'Install OpenCode',tag:'SETUP / WINDOWS',title:'Meet your new workbench.',intro:'Install the runtime and OpenCode, then start it in a dedicated workspace. From there, you’ll ask the agent to handle the project setup.',check:'OpenCode opens inside my video-workspace folder.',sections:[
-{title:'Install Node.js LTS',paragraphs:['Download the Windows LTS installer from <a href="https://nodejs.org/en/download">nodejs.org</a>. Framefields requires Node.js 22 or newer. Keep npm and PATH enabled, then reopen PowerShell.'],code:'node --version\nnpm.cmd --version'},
-{title:'Install OpenCode',paragraphs:['Use the documented npm route below. This course follows OpenCode’s terminal interface with <code>/connect</code> and <code>/models</code>. The <a href="https://opencode.ai/docs/">installation docs</a> distinguish OpenCode 1 and 2; don’t install both under the same command.'],code:'npm.cmd install -g opencode-ai\nopencode --version',note:'The .cmd wrapper avoids PowerShell’s npm.ps1 execution-policy issue without changing your security policy. If opencode is not found, close and reopen the terminal.'},
-{title:'Start in an empty workspace',paragraphs:['Create a folder in your user directory, or use an existing empty folder. Run these commands one line at a time.'],code:'New-Item -ItemType Directory -Force -Path "$HOME\\video-workspace"\nSet-Location "$HOME\\video-workspace"\nopencode',note:'A workspace is the directory the agent works in. Keep this exercise separate from employer repositories and confidential files.'},
-{title:'Optional: use your browser',paragraphs:['OpenCode also has a browser interface. After connecting your model in the next chapter, exit the terminal interface, stay in your workspace folder, and run the command below. It starts a local server and opens your default browser. You can chat with the agent and manage sessions there; the agent still works with files on your computer.','Keep the server terminal open while you work. Press Ctrl+C there to stop it. To resume later, run the same command from your project folder. The remaining setup instructions use the terminal interface; browser controls may differ.'],code:'opencode web',kind:'POWERSHELL · FROM YOUR WORKSPACE',note:'The default server listens only on 127.0.0.1. Keep that default for this exercise. Network access needs authentication. OpenCode recommends WSL for the best Windows web experience; this course uses native Windows for rendering, so stick with the terminal route if the browser interface has file-access or terminal issues. See the <a href="https://opencode.ai/docs/web/">official browser guide</a>.'}
-
-]},
-{short:'Connect a model',tag:'YOUR FIRST CONNECTION',title:'Pick a model. Start talking.',intro:'OpenCode is the application; the model is the service it talks to. OpenCode Go is a straightforward way to fund this exercise.',check:'My chosen model replies to a message in OpenCode.',sections:[
-{title:'Get OpenCode Go',paragraphs:['We suggest <a href="https://opencode.ai/console/go">OpenCode Go at $10/month</a> to follow along. It has model-specific usage limits, rather than unlimited usage. Check the checkout price and current allowances before subscribing.','Create your account, subscribe, and obtain a Console API key. In OpenCode, type <code>/connect</code>, choose OpenCode, and enter the key in the credential prompt. Don’t put it in an ordinary chat message.'],code:'/connect',kind:'INSIDE OPENCODE'},
-{title:'Start with DeepSeek V4.1 Flash',paragraphs:['Type <code>/models</code> and select <strong>DeepSeek V4.1 Flash</strong> from OpenCode’s provider. It’s our suggested value starting point for this course. The current Go catalog gives it a generous allowance; that is useful for trying edits and learning the workflow.','If it struggles after you’ve narrowed the problem, try <strong>DeepSeek V4 Pro</strong> or <strong>Kimi K3.1 Pro</strong>, both currently listed by Go. Compare the same task and inspect the result. These are practical choices to try, not a universal quality ranking.'],code:'/models',kind:'INSIDE OPENCODE',note:'Model advice checked 5 November 2026. We haven’t established that improvement requires 10× the spend. Limits, speed and task quality differ. Consult the <a href="https://opencode.ai/console/go">live catalog</a> before paying more.'},
-{title:'Check the connection',code:'Say hello, then explain in two sentences what tools you can use in this session. Do not change any files yet.',kind:'SEND TO YOUR AGENT',paragraphs:['Read the response. From the next chapter onward, work with OpenCode rather than manually guessing setup commands. Leave extra paid usage off unless you deliberately want it. Go pays for the coding model; media-generation credits are separate.']}
-]},
-{short:'Set up your film',tag:'HAND OVER TO THE AGENT',title:'Give it a goal and a workspace.',intro:'Let the agent read the project documentation, install Framefields, and establish a Git checkpoint. Give it working instructions once, then describe the result you want.',check:'My film project exists, the skill is available to OpenCode, and Git has a clean initial checkpoint.',sections:[
-{title:'Choose the subject',paragraphs:['The suggested film explains the tool-calling loop. A simple structure: 0–5 seconds, a person gives a goal; 5–10 seconds, the model asks a tool to act; 10–15 seconds, the tool returns a result and the model continues. The field below changes the subject in the next prompt.']},
-{"title": "Let the agent work: full permissions", "paragraphs": ["Silvio’s recommendation for this course: give the agent full permissions and let it get on with the job. He has worked this way since he started using agents earlier this year and reports no problems. You don’t need to read and approve every shell command to learn this workflow.", "Full permissions let the agent run commands and change files without stopping for approval. Those commands run with your Windows account’s access: they can delete files, read accessible credentials, contact services and spend available API credit. A dedicated project folder is an organizational boundary, not a sandbox.", "It’s your decision to grant that access, and you take responsibility for the consequences. Silvio expects you’ll be fine with a clear, bounded task like this one. His experience is not a guarantee: agents can misunderstand a clear request, write a faulty command, or follow misleading instructions in material they read. Git helps recover committed project files; it cannot undo every effect on your machine or an external service.", "Be explicit about what you want, which files are in scope, and whether spending or deleting anything is intended. Keep backups of work you care about. Then judge the output rather than babysitting each command. If you prefer approval prompts, you can keep them and still follow the course."]},
-{"title": "Let it run without approval prompts", "paragraphs": ["Run <code>opencode --auto</code>, or choose “Enable auto-approve permissions” in the terminal command palette.", "For a persistent setting, you can also tell OpenCode: “Add permission: allow to this project’s OpenCode settings, preserving the other settings.” Let the agent handle the configuration.", "Auto mode keeps explicit deny rules; <code>permission: allow</code> sets the general permission policy, though more specific agent rules can override it. Neither grants Windows administrator rights. See the <a href=\"https://opencode.ai/docs/permissions/\">permissions reference</a> if you want the details."]},
-{"title": "Give it working instructions once", "paragraphs": ["These are preferences for how the agent works, rather than the film you want it to make. Send them once and ask it to save them in the project’s AGENTS.md so future sessions can read them."], "code": "For this project, save these working instructions in AGENTS.md, preserving any existing instructions:\n- We use native Windows. Work in this workspace and my-film; keep existing global settings unchanged.\n- Read current documentation and existing project files before choosing commands. Use installed skills when relevant.\n- Carry routine setup, edits and checks through to completion. You don’t need to ask me to approve each command. Ask when a missing decision changes the task, such as my Git identity or a paid generation budget.\n- Keep secrets and generated output out of Git. Use Git LFS for large source media, checking existing patterns first. Commit useful milestones after checking the staged files for secrets.\n- Don’t upload, publish, buy services or delete unrelated files unless I request it.\n- Report what you changed, what you checked, and any checks you couldn’t perform.\nPut these instructions in my-film/AGENTS.md too once that project exists.", "kind": "SEND ONCE · WORKING INSTRUCTIONS", "note": "AGENTS.md supplies instructions; it does not enforce a security boundary. A skill is another set of instructions that teaches the agent a particular tool or workflow."},
-{"title": "Now give it the setup task", "paragraphs": ["This is the outcome you want. The agent can choose and verify the commands from the documentation; you don’t need to prescribe the entire installation procedure."], "code": "Set up a Framefields project called my-film for a 15-second film about [MY TOPIC].\n\nFollow https://github.com/gatewai-dev/framefields and its current docs. Check Node >=22, Git and Git LFS; use the documented project scaffold and install the Framefields skill for OpenCode in project scope. Verify you can read the skill.\n\nSet up a local Git repository and LFS for source media. Use my existing commit identity if available; otherwise ask for my chosen name and email, then configure them for this repository. Save an initial source checkpoint.\n\nTell me the project path and how to preview and render it. We’ll make the actual film in the next step.", "kind": "SEND TO YOUR AGENT · PROJECT BRIEF", "note": "The documented scaffold is <code>npx.cmd framefields init my-film --install</code>; the skill installer is <code>npx.cmd skills add gatewai-dev/framefields</code>. These are reference details for the agent, not commands you need to run yourself. You don’t need to clone the Framefields engine repository."},
-{title:'Keep the project context clear',paragraphs:['After setup, ask OpenCode to work in <code>my-film</code> for all film changes. If you restart OpenCode, open that folder in File Explorer, choose “Open in Terminal,” and run <code>opencode</code> there.','Ask for <code>git status</code> after each milestone. Commit the source and small configuration files; store chosen large source assets with LFS. A commit is a local checkpoint. A GitHub remote is an optional separate step.']}
-]},
-{short:'Make the first cut',tag:'CREATE / INSPECT',title:'Turn the idea into a timeline.',intro:'Start with a tiny complete film. A working rough cut gives you something concrete to improve.',check:'I have inspected frames from all three scenes and watched a rough cut.',sections:[
-{title:'Brief the agent',code:'In my-film, make a 15-second, 1280x720, 30fps Framefields explainer about [MY TOPIC]. Use the installed skill and inspect the current project before editing.\n\nFor the default agent topic, use three 5-second scenes:\n1. A person gives a goal: "Find the next train." Show request → model.\n2. The model requests a timetable lookup. Show model → tool call → timetable tool. Label this as an illustrative example; do not call a real transport API.\n3. The tool returns departure data. Show tool result → model → answer, with a loop arrow to show that another tool call may follow. Make clear the application executes the tool, not the model itself.\n\nIf my topic is different, propose an equivalent three-scene storyboard first. Use readable text, simple shapes and deliberate motion. No paid API calls, no external assets, no audio required.\n\nVerify preview and render commands from package.json and installed documentation. Render small test frames at each scene midpoint, inspect them, then render a rough MP4. Report exact output paths and how I can open them in Windows. Do not claim visual checks you cannot perform.',kind:'SEND TO YOUR AGENT'},
-{title:'Watch it yourself',paragraphs:['Open the file or local preview the agent points you to. Check that you can read the labels, that arrows show the right direction, and that each scene lasts long enough to understand. The landing-page animation is just a browser illustration, not a Framefields render.','For the agent explainer, check the technical story too: the model requests a tool call; the application executes it; its result is returned to the model. Some tasks need several loops. A tool call can fail, and access depends on the application and permissions.'],note:'If setup or rendering fails, paste the exact error back to the agent. Ask for one small diagnosis and a test frame before a full render. The help desk below has common Windows fixes.'}
-]},
-{short:'Improve + add media',tag:'ITERATE / OPTIONAL GENERATION',title:'Direct the next version.',intro:'Give specific feedback. Once the film works, you can optionally try generated imagery, voice or video with a separate media budget.',check:'I made a targeted revision, compared it with the first cut, and saved a Git checkpoint.',sections:[
-{title:'Try one focused revision',code:'In my-film, revise only the middle scene. Make the tool-call label larger, increase its contrast and hold it for at least two seconds. Keep the film 15 seconds long. Keep the other scenes unchanged.\n\nShow the source diff, render the changed scene for inspection, and explain how to compare it with the previous cut. Once I approve the result, check git status and commit this revision, excluding secrets and generated output.',kind:'SEND TO YOUR AGENT',paragraphs:['If you chose another topic, swap the requested change for something that fits. Small, observable requests are easier to evaluate than “make it better.”']},
-{title:'Optional: generate an asset',paragraphs:['Your film is already AI-assisted: the agent wrote its code. If you want generated media too, <a href="https://framefields.dev/models/">Framefields Models</a> is the built-in gateway catalog for images, video, music and voice. <a href="https://openrouter.ai/">OpenRouter</a> is another provider; pick a model that explicitly supports the output you need.','A model that understands video does not necessarily generate video. OpenRouter has separate <a href="https://openrouter.ai/docs/guides/overview/multimodal/video-generation">video generation documentation</a>. Ask the agent to verify the model’s output type, current API and integration before using it. These services need separate accounts, keys and payment; Go does not fund them.'],code:'I want one optional generated asset for this film. Compare a suitable model on Framefields Models with a suitable OpenRouter option. Verify current output support and pricing from official docs. Propose one small generation and its estimated cost; ask me to approve the provider, asset and maximum spend before making a paid request. No retries or additional generations without approval.\n\nHelp me enter the key locally without posting it in chat. For Framefields use the documented FRAMEFIELDS_API_KEY in .env. Confirm .env is ignored and unstaged. For OpenRouter verify the appropriate integration rather than assuming its key works with Framefields. Save the approved asset under assets/, track it with Git LFS, then incorporate it without changing the timeline.',kind:'SEND TO YOUR AGENT',note:'Use provider spending controls where available, and check actual charges after each generation. Don’t assume a hard cap exists. Regenerate a leaked key; deleting it from the latest file does not remove it from Git history.'}
-]},
-{short:'Export + keep going',tag:'YOUR FINISHED FILE',title:'“Hey, I made that.”',intro:'Export the final MP4, play it outside the project, and keep the source so you can change it later.',check:'My MP4 plays all 15 seconds, my source is committed, and I know where both live.',sections:[
-{title:'Ask for the final export',code:'In my-film, inspect package.json and the installed Framefields render documentation. Export our complete 15-second film as output/agent-explainer.mp4 (H.264 if supported, 1280x720, 30fps). Verify duration, dimensions and non-zero file size using available tools. Report anything you could not check. Open its folder in Windows File Explorer so I can play it myself.\n\nCheck git status and review the diff. Commit the final source and configuration, ensuring .env, dependencies and generated output remain excluded. Check git lfs ls-files for any source media. Summarize what changed and give me the exact steps to resume this project later.',kind:'SEND TO YOUR AGENT'},
-{title:'Check the deliverable',list:['Double-click the MP4 in File Explorer. Does it open, play to the end and tell the intended story?','Read every caption at normal playback speed. Check the beginning, scene boundaries and final frame.','Keep the project folder and back it up. Git history on the same disk is not a backup. If sharing the source, check for secrets first and account for LFS storage on the remote.'],note:'When sharing a repository that uses LFS, your collaborator needs Git LFS and access to the LFS objects as well as the Git repository. A downloadable source ZIP may not contain the media objects.'},
-{title:'A second lap',paragraphs:['Try a vertical version, replace the example tool with a calculator, or show a failed tool call followed by a recovery. Ask for one change, inspect the result, checkpoint it.','You’ve practiced the core workflow: give a goal, let the agent use tools, inspect evidence, and steer the next step. The video is yours to keep building on.']},
-{title:'Reference shelf',paragraphs:['Setup: <a href="https://git-scm.com/install/windows">Git for Windows</a> · <a href="https://git-lfs.com/">Git LFS</a> · <a href="https://nodejs.org/en/download">Node.js</a> · <a href="https://opencode.ai/docs/">OpenCode docs</a>','Video: <a href="https://github.com/gatewai-dev/framefields">Framefields source and README</a> · <a href="https://framefields.dev/docs">Framefields docs</a> · <a href="https://framefields.dev/models/">Framefields Models</a> · <a href="https://openrouter.ai/">OpenRouter</a>','Pricing and model availability reviewed 5 November 2026. Check the linked provider pages for changes. This site doesn’t receive your prompts or API keys. Progress and your chosen topic are stored only in this browser.']}
-]}
+  {
+    "short": "Start here",
+    "tag": "THE BRIEF",
+    "title": "So you’ve never used an agent?",
+    "intro": "You know your way around a computer. Now let’s put an agent to work: make a short video, inspect the result, and ask for a better version.",
+    "check": "I know what I’m making and which tools I’ll use.",
+    "sections": [
+      {
+        "title": "Your first deliverable",
+        "paragraphs": [
+          "A 15-second explainer about how agents work. Three scenes: you give a goal; the model calls a tool; the result comes back and the agent continues. Prefer another topic? There’s a place to choose yours later.",
+          "You’ll use <strong>OpenCode</strong> to work with an AI model, <strong>Git</strong> to checkpoint the files, and <strong>Framefields</strong> to turn the agent’s code into video. The first version uses text, shapes and motion. Generating media with another model is optional."
+        ]
+      },
+      {
+        "title": "What makes this an agent?",
+        "paragraphs": [
+          "A chat model can suggest a command. An agent can request a tool that runs it, read the result, and choose a next step. OpenCode supplies those tools and handles permissions; the model chooses how to use them.",
+          "That loop is useful, but it can still get stuck or make bad calls. You supply the goal, grant the tools access, inspect the output, and steer. This course gives you a small project to practice that loop."
+        ],
+        "note": "We use native Windows and PowerShell throughout. OpenCode also supports <a href=\"https://opencode.ai/docs/windows-wsl\">WSL</a>, but you don’t need it for this course."
+      }
+    ]
+  },
+  {
+    "short": "Git + Git LFS",
+    "tag": "SETUP / WINDOWS",
+    "title": "Give your work a save point.",
+    "intro": "Install Git for version history and Git LFS for large media. You don’t need a GitHub account to use either locally.",
+    "check": "Git is installed. I can leave identity and LFS setup to the agent.",
+    "sections": [
+      {
+        "title": "Install Git for Windows",
+        "list": [
+          "Download the installer for your machine (x64 or ARM64) from <a href=\"https://git-scm.com/install/windows\">Git for Windows</a>. Run it and keep the recommended defaults, including command-line PATH access.",
+          "Open a fresh PowerShell window from Start and run the checks below. Git for Windows normally includes Git LFS. If LFS is missing, you can let OpenCode install it during project setup."
+        ],
+        "code": "git --version\ngit lfs version"
+      },
+      {
+        "title": "Optional: configure Git yourself",
+        "paragraphs": [
+          "You can skip this section: the agent will configure Git and LFS during project setup. These commands are here if you want to learn what it does.",
+          "Git records a name and email on each commit. Replace the placeholders below with your chosen identity. A GitHub no-reply email works if you want to keep your personal address private. These optional commands set defaults for all your local repositories."
+        ],
+        "code": "git config --global user.name \"Your Name\"\ngit config --global user.email \"your-chosen-email@example.com\"\ngit lfs install\ngit config --global --get user.name\ngit config --global --get user.email",
+        "note": "Git stores history. LFS stores pointers in that history and keeps large file content separately. We’ll track source media once the project exists; generated renders usually belong in .gitignore. Remote LFS storage and bandwidth can have quotas or charges."
+      }
+    ]
+  },
+  {
+    "short": "Install OpenCode",
+    "tag": "SETUP / WINDOWS",
+    "title": "Meet your new workbench.",
+    "intro": "Install the runtime and OpenCode, then start it in a dedicated workspace. From there, you’ll ask the agent to handle the project setup.",
+    "check": "OpenCode opens inside my video-workspace folder.",
+    "sections": [
+      {
+        "title": "Install Node.js LTS",
+        "paragraphs": [
+          "Download the Windows LTS installer from <a href=\"https://nodejs.org/en/download\">nodejs.org</a>. Framefields requires Node.js 22 or newer. Keep npm and PATH enabled, then reopen PowerShell."
+        ],
+        "code": "node --version\nnpm.cmd --version"
+      },
+      {
+        "title": "Install OpenCode",
+        "paragraphs": [
+          "Run the commands below in PowerShell to install OpenCode and check it works. We use the <a href=\"https://opencode.ai/docs/\">documented npm installation</a> and its terminal interface for the initial connection."
+        ],
+        "code": "npm.cmd install -g opencode-ai\nopencode --version",
+        "note": "The .cmd wrapper avoids PowerShell’s npm.ps1 execution-policy issue without changing your security policy. If opencode is not found, close and reopen the terminal."
+      },
+      {
+        "title": "Start in an empty workspace",
+        "paragraphs": [
+          "Create a folder and start OpenCode there. The --auto option lets it work without repeated permission prompts; chapter 5 explains the access you’re granting."
+        ],
+        "code": "New-Item -ItemType Directory -Force -Path \"$HOME\\video-workspace\"\nSet-Location \"$HOME\\video-workspace\"\nopencode --auto",
+        "note": "A workspace is the folder the agent works in. Auto mode lets commands run with your account’s access, so use a separate project and keep backups of work you care about. Chapter 5 covers the choice in more detail."
+      }
+    ]
+  },
+  {
+    "short": "Connect a model",
+    "tag": "YOUR FIRST CONNECTION",
+    "title": "Pick a model. Start talking.",
+    "intro": "OpenCode is the application; the model is the service it talks to. OpenCode Go is a straightforward way to fund this exercise.",
+    "check": "My chosen model replies to a message in OpenCode.",
+    "sections": [
+      {
+        "title": "Get OpenCode Go",
+        "paragraphs": [
+          "Subscribe to <a href=\"https://opencode.ai/console/go\">OpenCode Go ($10/month)</a> and create a Console API key. Check the checkout price before subscribing.",
+          "In OpenCode, type <code>/connect</code>, choose OpenCode, and enter the key in the credential prompt."
+        ],
+        "code": "/connect",
+        "kind": "INSIDE OPENCODE",
+        "note": "Go has model-specific usage limits. Leave extra paid usage off unless you want it. Enter keys in credential prompts, not ordinary chat messages. Media-generation credits are separate."
+      },
+      {
+        "title": "Start with DeepSeek V4.1 Flash",
+        "paragraphs": [
+          "Type <code>/models</code> and choose <strong>DeepSeek V4.1 Flash</strong> from OpenCode’s provider. It’s our suggested value starting point: its generous Go allowance is useful for learning and trying edits."
+        ],
+        "code": "/models",
+        "kind": "INSIDE OPENCODE",
+        "note": "Model choices checked 5 November 2026. If it struggles after you narrow the task, try DeepSeek V4 Pro or Kimi K3.1 Pro. Check availability and allowances in the <a href=\"https://opencode.ai/console/go\">live catalog</a>."
+      },
+      {
+        "title": "Check the connection",
+        "code": "Say hello and explain in two sentences what tools you can use in this session.",
+        "kind": "SEND TO YOUR AGENT",
+        "paragraphs": [
+          "Once the model replies, you’re ready to hand the setup work to the agent."
+        ]
+      },
+      {
+        "title": "Optional: use your browser",
+        "paragraphs": [
+          "Prefer a browser? Now that your model is connected, exit the terminal interface and run <code>opencode web</code> from your workspace. It opens the browser interface; your files and agent still run locally.",
+          "Keep that terminal open while you work; Ctrl+C stops the server. You can ask the agent to enable automatic permissions in the project settings."
+        ],
+        "code": "opencode web",
+        "kind": "POWERSHELL · FROM YOUR WORKSPACE",
+        "note": "Keep the default localhost address. OpenCode recommends WSL for its Windows web interface; if you hit a problem on native Windows, continue with the terminal interface. <a href=\"https://opencode.ai/docs/web/\">Browser guide ↗</a>"
+      }
+    ]
+  },
+  {
+    "short": "Set up your film",
+    "tag": "HAND OVER TO THE AGENT",
+    "title": "Give it a goal and a workspace.",
+    "intro": "Let the agent read the project documentation, install Framefields, and establish a Git checkpoint. Give it working instructions once, then describe the result you want.",
+    "check": "My film project exists, the skill is available to OpenCode, and Git has a clean initial checkpoint.",
+    "sections": [
+      {
+        "title": "Choose the subject",
+        "paragraphs": [
+          "Use the topic field above to choose your subject. Our suggested film explains the tool-calling loop: a person gives a goal; the model requests a tool; the result comes back and the model continues. Your choice fills in the setup and film prompts."
+        ]
+      },
+      {
+        "title": "Let the agent work: full permissions",
+        "paragraphs": [
+          "Silvio recommends giving the agent full permissions and letting it work. He has used this approach since he started with agents earlier this year and reports no problems. You can judge the result without approving every command.",
+          "You’re choosing to give it your Windows account’s access. It can change or delete accessible files, read credentials, contact services and spend available API credit. The project folder is not a sandbox. You take responsibility for that choice; keep backups of work you care about.",
+          "Clear tasks help: say what you want and whether deleting, publishing or spending is intended. Agents can still make mistakes or follow misleading material they read. Git can recover committed project files, not every external effect. If you prefer approval prompts, start with <code>opencode</code> instead of <code>opencode --auto</code>."
+        ]
+      },
+      {
+        "title": "Let it run without approval prompts",
+        "paragraphs": [
+          "If you started with <code>opencode --auto</code>, you’re already set. Otherwise choose “Enable auto-approve permissions” in the terminal command palette, or restart with <code>opencode --auto</code>.",
+          "For a persistent setting, you can also tell OpenCode: “Add permission: allow to this project’s OpenCode settings, preserving the other settings.” Let the agent handle the configuration.",
+          "Auto mode keeps explicit deny rules; <code>permission: allow</code> sets the general permission policy, though more specific agent rules can override it. Neither grants Windows administrator rights. See the <a href=\"https://opencode.ai/docs/permissions/\">permissions reference</a> if you want the details."
+        ]
+      },
+      {
+        "title": "Give it working instructions once",
+        "paragraphs": [
+          "These are reusable preferences for how the agent works. Send this once; it will save them in AGENTS.md when it creates the project. Later prompts can focus on what you want to make."
+        ],
+        "code": "Save these project preferences in my-film/AGENTS.md when you create the project:\n- Use native Windows and work in my-film. Preserve global settings.\n- Read the project docs and use the Framefields skill. Carry routine work through to a checked result without asking me to approve each command.\n- Commit useful milestones. Keep secrets and generated output out of Git; use LFS for large source media.\n- Ask for missing personal choices or a spending budget. Don’t publish or delete unrelated files unless I ask.\n- Tell me what changed, what you checked, and what you couldn’t check.",
+        "kind": "SEND ONCE · WORKING INSTRUCTIONS",
+        "note": "AGENTS.md supplies instructions; it does not enforce a security boundary. A skill is another set of instructions that teaches the agent a particular tool or workflow."
+      },
+      {
+        "title": "Now give it the setup task",
+        "paragraphs": [
+          "This is the outcome you want. The agent can choose and verify the commands from the documentation; you don’t need to prescribe the entire installation procedure."
+        ],
+        "code": "Set up a Framefields project called my-film for a 15-second film about [MY TOPIC].\n\nFollow https://github.com/gatewai-dev/framefields and its current docs. Install the Framefields skill for OpenCode in this project. Check the prerequisites and handle any missing setup, including Git LFS.\n\nUse my existing Git identity, or ask for my chosen name and email if it’s missing. Create a local repository and initial commit. Tell me where the project is and how to preview it. We’ll make the film next.",
+        "kind": "SEND TO YOUR AGENT · PROJECT BRIEF",
+        "note": "The agent can find the installation commands in the documentation. A Framefields project uses the engine as a dependency; you don’t need to clone its source repository."
+      },
+      {
+        "title": "Keep the project context clear",
+        "paragraphs": [
+          "Continue in the same OpenCode session; the agent knows where it created my-film. If you come back later, open my-film in File Explorer, choose “Open in Terminal,” and run <code>opencode --auto</code> (or <code>opencode web</code> for the browser). Ask it to continue the existing project.",
+          "The agent handles commits. You can ask “Show me what changed since the last commit” whenever you want to learn how the source evolved. Git history is local until you choose to share it."
+        ]
+      }
+    ]
+  },
+  {
+    "short": "Make the first cut",
+    "tag": "CREATE / INSPECT",
+    "title": "Turn the idea into a timeline.",
+    "intro": "Start with a tiny complete film. A working rough cut gives you something concrete to improve.",
+    "check": "I have inspected frames from all three scenes and watched a rough cut.",
+    "sections": [
+      {
+        "title": "Brief the agent",
+        "code": "Make a 15-second, 1280x720, 30fps film about [MY TOPIC].\n\nFor the agent explainer, use three 5-second scenes:\n1. A person asks: “Find the next train.” Show request → model.\n2. The model requests a timetable lookup. Show model → tool call → timetable tool. This is an illustration, not a real API call.\n3. The tool returns departures. Show result → model → answer, with a loop arrow for possible further calls. Make clear that the application executes the tool.\n\nIf I chose another topic, adapt the three-scene structure to it. Use readable text, shapes and motion, with no external assets or paid generation.\n\nRender a rough MP4 and show me how to play it. Check representative frames from all three scenes.",
+        "kind": "SEND TO YOUR AGENT"
+      },
+      {
+        "title": "Watch it yourself",
+        "paragraphs": [
+          "Open the file or local preview the agent points you to. Check that you can read the labels, that arrows show the right direction, and that each scene lasts long enough to understand. The landing-page animation is just a browser illustration, not a Framefields render.",
+          "For the agent explainer, check the technical story too: the model requests a tool call; the application executes it; its result is returned to the model. Some tasks need several loops. A tool call can fail, and access depends on the application and permissions."
+        ],
+        "note": "If setup or rendering fails, paste the exact error back to the agent. Ask for one small diagnosis and a test frame before a full render. The help desk below has common Windows fixes."
+      }
+    ]
+  },
+  {
+    "short": "Improve + add media",
+    "tag": "ITERATE / OPTIONAL GENERATION",
+    "title": "Direct the next version.",
+    "intro": "Give specific feedback. Once the film works, you can optionally try generated imagery, voice or video with a separate media budget.",
+    "check": "I made a targeted revision, compared it with the first cut, and saved a Git checkpoint.",
+    "sections": [
+      {
+        "title": "Try one focused revision",
+        "code": "Revise only the middle scene: make the tool-call label larger, increase its contrast and hold it for at least two seconds. Keep the film 15 seconds long and the other scenes unchanged. Render the updated cut so I can compare it with the first version. Save a Git checkpoint.",
+        "kind": "SEND TO YOUR AGENT",
+        "paragraphs": [
+          "If you chose another topic, swap the requested change for something that fits. Small, observable requests are easier to evaluate than “make it better.”"
+        ]
+      },
+      {
+        "title": "Optional: generate an asset",
+        "paragraphs": [
+          "Want a generated image, voice or clip? Start with <a href=\"https://framefields.dev/models/\">Framefields Models</a>, the built-in gateway, or use <a href=\"https://openrouter.ai/\">OpenRouter</a> if you prefer. Create an account and decide how much you’re willing to spend. These use separate credits from OpenCode Go.",
+          "Tell the agent the asset you want, your provider and your budget. It can pick a suitable model and handle the integration. A model that understands video may not generate it; the agent should check its output support against the provider’s docs."
+        ],
+        "code": "I want one generated background image for the middle scene using Framefields Models (use OpenRouter instead if I specify it). Agree a total budget with me before spending.\n\nOnce we’ve chosen the budget, handle model selection and integration within it, including retries. Show me how to enter the API key locally without pasting it in chat, and add the image to the film without changing its duration.",
+        "kind": "SEND TO YOUR AGENT",
+        "note": "You choose the budget once; the agent can handle the work within it. Use provider spending controls where available and check actual charges. If a key leaks, revoke it—removing the file doesn’t erase Git history."
+      }
+    ]
+  },
+  {
+    "short": "Export + keep going",
+    "tag": "YOUR FINISHED FILE",
+    "title": "“Hey, I made that.”",
+    "intro": "Export the final MP4, play it outside the project, and keep the source so you can change it later.",
+    "check": "My MP4 plays all 15 seconds, my source is committed, and I know where both live.",
+    "sections": [
+      {
+        "title": "Ask for the final export",
+        "code": "Export the final 15-second film to output/final-film.mp4 at 1280x720, 30fps, using H.264 if supported. Check the output and open its folder so I can play it.\n\nCommit the final source. Tell me where the source and MP4 live, anything you couldn’t verify, and how to resume this project later.",
+        "kind": "SEND TO YOUR AGENT"
+      },
+      {
+        "title": "Check the deliverable",
+        "list": [
+          "Double-click the MP4 in File Explorer. Does it open, play to the end and tell the intended story?",
+          "Read every caption at normal playback speed. Check the beginning, scene boundaries and final frame.",
+          "Keep the project folder and back it up. Git history on the same disk is not a backup. If sharing the source, check for secrets first and account for LFS storage on the remote."
+        ],
+        "note": "When sharing a repository that uses LFS, your collaborator needs Git LFS and access to the LFS objects as well as the Git repository. A downloadable source ZIP may not contain the media objects."
+      },
+      {
+        "title": "A second lap",
+        "paragraphs": [
+          "Try a vertical version, replace the example tool with a calculator, or show a failed tool call followed by a recovery. Ask for one change, inspect the result, checkpoint it.",
+          "You’ve practiced the core workflow: give a goal, let the agent use tools, inspect evidence, and steer the next step. The video is yours to keep building on."
+        ]
+      },
+      {
+        "title": "Reference shelf",
+        "paragraphs": [
+          "Setup: <a href=\"https://git-scm.com/install/windows\">Git for Windows</a> · <a href=\"https://git-lfs.com/\">Git LFS</a> · <a href=\"https://nodejs.org/en/download\">Node.js</a> · <a href=\"https://opencode.ai/docs/\">OpenCode docs</a>",
+          "Video: <a href=\"https://github.com/gatewai-dev/framefields\">Framefields source and README</a> · <a href=\"https://framefields.dev/docs\">Framefields docs</a> · <a href=\"https://framefields.dev/models/\">Framefields Models</a> · <a href=\"https://openrouter.ai/\">OpenRouter</a>",
+          "Pricing and model availability reviewed 5 November 2026. Check the linked provider pages for changes. This site doesn’t receive your prompts or API keys. Progress and your chosen topic are stored only in this browser."
+        ]
+      }
+    ]
+  }
 ];
